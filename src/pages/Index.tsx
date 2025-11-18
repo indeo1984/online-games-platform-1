@@ -33,6 +33,7 @@ const Index = () => {
   const [chatSearch, setChatSearch] = useState('');
   const [messageText, setMessageText] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<number | null>(1);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const games: Game[] = [
     { id: 1, name: 'Каркассон', players: '2-5', category: 'Стратегия' },
@@ -259,22 +260,40 @@ const Index = () => {
         </div>
       </header>
 
-      <div className="flex">
-        <main className="flex-1 container mx-auto px-6 py-8">
-          {renderContent()}
-        </main>
+      <main className="container mx-auto px-6 py-8">
+        {renderContent()}
+      </main>
 
-        <aside className="w-80 border-l border-border bg-card/30 backdrop-blur">
-          <div className="p-6 space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold">Чат</h2>
+      <Button
+        onClick={() => setIsChatOpen(!isChatOpen)}
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:scale-110 transition-transform z-40"
+        size="icon"
+      >
+        <Icon name={isChatOpen ? "X" : "MessageCircle"} size={24} />
+      </Button>
+
+      {isChatOpen && (
+        <div className="fixed bottom-24 right-6 md:w-96 w-full md:h-[600px] h-full md:rounded-lg md:top-auto top-0 md:left-auto left-0 md:bottom-24 bottom-0 bg-card border border-border shadow-2xl z-50 animate-scale-in">
+          <div className="flex flex-col h-full">
+            <div className="p-4 border-b border-border bg-card/80 backdrop-blur flex items-center justify-between">
+              <h2 className="text-xl font-bold">Чат</h2>
+              <div className="flex gap-2">
                 <Button size="sm" variant="outline">
                   <Icon name="Plus" size={16} className="mr-2" />
                   Создать
                 </Button>
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="md:hidden"
+                  onClick={() => setIsChatOpen(false)}
+                >
+                  <Icon name="X" size={20} />
+                </Button>
               </div>
+            </div>
 
+            <div className="p-4 border-b border-border">
               <div className="relative">
                 <Icon
                   name="Search"
@@ -288,40 +307,39 @@ const Index = () => {
                   className="pl-10"
                 />
               </div>
-
-              <ScrollArea className="h-48">
-                <div className="space-y-2">
-                  {filteredGroups.map((group) => (
-                    <Card
-                      key={group.id}
-                      className={`p-3 cursor-pointer transition-all hover:border-primary ${
-                        selectedGroup === group.id ? 'border-primary bg-primary/10' : ''
-                      }`}
-                      onClick={() => setSelectedGroup(group.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <div className="font-semibold text-sm">{group.name}</div>
-                          <div className="text-xs text-muted-foreground">{group.game}</div>
-                        </div>
-                        <Badge variant="secondary" className="text-xs">
-                          <Icon name="Users" size={10} className="mr-1" />
-                          {group.members}
-                        </Badge>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </ScrollArea>
             </div>
 
-            {selectedGroup && (
-              <div className="space-y-4">
-                <h3 className="font-bold">Сообщения</h3>
-                <ScrollArea className="h-64 border border-border rounded-lg p-4 bg-background/50">
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-2 mb-4">
+                <h3 className="text-sm font-semibold text-muted-foreground mb-2">Группы</h3>
+                {filteredGroups.map((group) => (
+                  <Card
+                    key={group.id}
+                    className={`p-3 cursor-pointer transition-all hover:border-primary ${
+                      selectedGroup === group.id ? 'border-primary bg-primary/10' : ''
+                    }`}
+                    onClick={() => setSelectedGroup(group.id)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <div className="font-semibold text-sm">{group.name}</div>
+                        <div className="text-xs text-muted-foreground">{group.game}</div>
+                      </div>
+                      <Badge variant="secondary" className="text-xs">
+                        <Icon name="Users" size={10} className="mr-1" />
+                        {group.members}
+                      </Badge>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              {selectedGroup && (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-muted-foreground">Сообщения</h3>
                   <div className="space-y-4">
                     {messages.map((msg) => (
-                      <div key={msg.id} className="space-y-1">
+                      <div key={msg.id} className="space-y-1 p-3 bg-accent/50 rounded-lg">
                         <div className="flex items-center justify-between">
                           <span className="font-semibold text-sm">{msg.user}</span>
                           <span className="text-xs text-muted-foreground">{msg.time}</span>
@@ -330,8 +348,12 @@ const Index = () => {
                       </div>
                     ))}
                   </div>
-                </ScrollArea>
+                </div>
+              )}
+            </ScrollArea>
 
+            {selectedGroup && (
+              <div className="p-4 border-t border-border bg-card/80 backdrop-blur">
                 <div className="flex gap-2">
                   <Input
                     placeholder="Написать сообщение..."
@@ -350,8 +372,8 @@ const Index = () => {
               </div>
             )}
           </div>
-        </aside>
-      </div>
+        </div>
+      )}
     </div>
   );
 };
