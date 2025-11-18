@@ -268,18 +268,20 @@ const Index = () => {
         {renderContent()}
       </main>
 
-      <Button
-        onClick={() => setIsChatOpen(!isChatOpen)}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:scale-110 transition-transform z-40 relative"
-        size="icon"
-      >
-        <Icon name={isChatOpen ? "X" : "MessageCircle"} size={24} />
-        {!isChatOpen && unreadCount > 0 && (
-          <Badge className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-destructive text-destructive-foreground">
-            {unreadCount}
-          </Badge>
-        )}
-      </Button>
+      <div className="fixed bottom-6 right-6 z-40">
+        <Button
+          onClick={() => setIsChatOpen(!isChatOpen)}
+          className="h-14 w-14 rounded-full shadow-lg hover:scale-110 transition-transform relative"
+          size="icon"
+        >
+          <Icon name={isChatOpen ? "X" : "MessageCircle"} size={24} />
+          {!isChatOpen && unreadCount > 0 && (
+            <Badge className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-destructive text-destructive-foreground">
+              {unreadCount}
+            </Badge>
+          )}
+        </Button>
+      </div>
 
       {isChatOpen && (
         <div className="fixed bottom-24 right-6 md:w-96 w-full md:h-[600px] h-full md:rounded-lg md:top-auto top-0 md:left-auto left-0 md:bottom-24 bottom-0 bg-card border border-border shadow-2xl z-50 animate-scale-in">
