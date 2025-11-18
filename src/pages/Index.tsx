@@ -19,6 +19,7 @@ interface ChatMessage {
   user: string;
   message: string;
   time: string;
+  isMine?: boolean;
 }
 
 interface ChatGroup {
@@ -34,6 +35,7 @@ const Index = () => {
   const [messageText, setMessageText] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<number | null>(1);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [unreadCount] = useState(5);
 
   const games: Game[] = [
     { id: 1, name: 'Каркассон', players: '2-5', category: 'Стратегия' },
@@ -53,10 +55,12 @@ const Index = () => {
   ];
 
   const messages: ChatMessage[] = [
-    { id: 1, user: 'Алексей', message: 'Кто готов в Каркассон?', time: '14:23' },
-    { id: 2, user: 'Мария', message: 'Я в деле! Во сколько начинаем?', time: '14:25' },
-    { id: 3, user: 'Дмитрий', message: 'Подключусь в 19:00', time: '14:30' },
-    { id: 4, user: 'Елена', message: 'Можно мне тоже?', time: '14:35' },
+    { id: 1, user: 'Алексей', message: 'Кто готов в Каркассон?', time: '14:23', isMine: false },
+    { id: 2, user: 'Мария', message: 'Я в деле! Во сколько начинаем?', time: '14:25', isMine: false },
+    { id: 3, user: 'Вы', message: 'Отлично! Жду всех в 19:00', time: '14:28', isMine: true },
+    { id: 4, user: 'Дмитрий', message: 'Подключусь в 19:00', time: '14:30', isMine: false },
+    { id: 5, user: 'Вы', message: 'Договорились, встречаемся!', time: '14:32', isMine: true },
+    { id: 6, user: 'Елена', message: 'Можно мне тоже?', time: '14:35', isMine: false },
   ];
 
   const filteredGroups = chatGroups.filter(group =>
@@ -266,10 +270,15 @@ const Index = () => {
 
       <Button
         onClick={() => setIsChatOpen(!isChatOpen)}
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:scale-110 transition-transform z-40"
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:scale-110 transition-transform z-40 relative"
         size="icon"
       >
         <Icon name={isChatOpen ? "X" : "MessageCircle"} size={24} />
+        {!isChatOpen && unreadCount > 0 && (
+          <Badge className="absolute -top-1 -right-1 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-destructive text-destructive-foreground">
+            {unreadCount}
+          </Badge>
+        )}
       </Button>
 
       {isChatOpen && (
@@ -293,61 +302,62 @@ const Index = () => {
               </div>
             </div>
 
-            <div className="p-4 border-b border-border">
-              <div className="relative">
-                <Icon
-                  name="Search"
-                  size={18}
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
-                />
-                <Input
-                  placeholder="Поиск групп..."
-                  value={chatSearch}
-                  onChange={(e) => setChatSearch(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+            <div className="border-b border-border">
+              <ScrollArea className="w-full">
+                <div className="flex gap-2 p-4">
+                  {filteredGroups.map((group) => (
+                    <Button
+                      key={group.id}
+                      variant={selectedGroup === group.id ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setSelectedGroup(group.id)}
+                      className="whitespace-nowrap flex-shrink-0"
+                    >
+                      {group.name}
+                      <Badge variant="secondary" className="ml-2 text-xs">
+                        {group.members}
+                      </Badge>
+                    </Button>
+                  ))}
+                </div>
+              </ScrollArea>
             </div>
 
             <ScrollArea className="flex-1 p-4">
-              <div className="space-y-2 mb-4">
-                <h3 className="text-sm font-semibold text-muted-foreground mb-2">Группы</h3>
-                {filteredGroups.map((group) => (
-                  <Card
-                    key={group.id}
-                    className={`p-3 cursor-pointer transition-all hover:border-primary ${
-                      selectedGroup === group.id ? 'border-primary bg-primary/10' : ''
-                    }`}
-                    onClick={() => setSelectedGroup(group.id)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <div className="font-semibold text-sm">{group.name}</div>
-                        <div className="text-xs text-muted-foreground">{group.game}</div>
-                      </div>
-                      <Badge variant="secondary" className="text-xs">
-                        <Icon name="Users" size={10} className="mr-1" />
-                        {group.members}
-                      </Badge>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-
               {selectedGroup && (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-muted-foreground">Сообщения</h3>
-                  <div className="space-y-4">
-                    {messages.map((msg) => (
-                      <div key={msg.id} className="space-y-1 p-3 bg-accent/50 rounded-lg">
-                        <div className="flex items-center justify-between">
+                  {messages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`flex ${msg.isMine ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[80%] space-y-1 p-3 rounded-lg ${
+                          msg.isMine
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-accent/50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
                           <span className="font-semibold text-sm">{msg.user}</span>
-                          <span className="text-xs text-muted-foreground">{msg.time}</span>
+                          <span
+                            className={`text-xs ${
+                              msg.isMine ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                            }`}
+                          >
+                            {msg.time}
+                          </span>
                         </div>
-                        <p className="text-sm text-muted-foreground">{msg.message}</p>
+                        <p
+                          className={`text-sm ${
+                            msg.isMine ? 'text-primary-foreground' : 'text-muted-foreground'
+                          }`}
+                        >
+                          {msg.message}
+                        </p>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </ScrollArea>
