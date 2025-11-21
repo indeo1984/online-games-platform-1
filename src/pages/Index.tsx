@@ -52,6 +52,7 @@ const Index = () => {
     { id: 1, name: 'Любители Каркассона', members: 4, game: 'Каркассон' },
     { id: 2, name: 'Вечер Манчкина', members: 6, game: 'Манчкин' },
     { id: 3, name: 'Стратеги', members: 3, game: 'Колонизаторы' },
+    { id: 4, name: 'Тест', members: 2, game: 'Тест' },
   ];
 
   const messages: ChatMessage[] = [
